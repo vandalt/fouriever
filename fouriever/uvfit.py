@@ -462,6 +462,7 @@ class data():
             hdu3 = pyfits.ImageHDU(nsigmas)
             hdu3.header['EXTNAME'] = 'NSIGMAS'
             hdul = pyfits.HDUList([hdu0, hdu1, hdu2, hdu3])
+            # TODO: Handle
             hdul.writeto(ofile+'.fits', output_verify='fix', overwrite=True)
             hdul.close()
         
@@ -1116,6 +1117,7 @@ class data():
                 if ('kp' in self.observables):
                     self.data_list[ww[i]][j]['kp'] += np.sign(p0[0])*(util.v2kp(vis_bin, data=self.data_list[ww[i]][j])-util.v2kp(vis_ref, data=self.data_list[ww[i]][j]))
         
+        # TODO: Handle ofile here
         if ('v2' in self.observables):
             v2_out = []
             for i in range(len(ww)):
@@ -2510,6 +2512,7 @@ class data():
             plt.ylabel('$v$ (arcsec$^{-1}$)', fontsize=12., labelpad=0.25)
             plt.minorticks_on()
             plt.tight_layout()
+            # TODO: Handle ofile
             plt.savefig(ofile+'_phase.pdf')
 
         return phase_list, u_list, v_list

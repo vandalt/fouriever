@@ -40,6 +40,22 @@ plt.rc('figure', titlesize=18)
 # MAIN
 # =============================================================================
 
+def _save_ofile(ofile, out_id):
+    # ofile is [dir/]prefix where dir is optional
+    if (ofile is None):
+        return
+    odir, basename = os.path.split(ofile)
+    stem, ext = os.path.splitext(basename)
+    if (odir != ""):
+        os.makedirs(odir, exist_ok=True)
+    # TODO: Include dot in ext? Or remove from formats known?
+    if ("." + ext not in formats_known):
+        ext = "pdf"
+    # os.path.join will just ignore odir if it is empty
+    out_path = os.path.join(odir, stem + '_' + out_id + '.' + ext)
+    plt.savefig(out_path)
+
+
 def v2_ud_base(data_list,
                fit,
                smear=None,
@@ -116,16 +132,7 @@ def v2_ud_base(data_list,
     plt.subplots_adjust(wspace=0., hspace=0.)
     fig.align_ylabels()
     plt.suptitle('Uniform disk fit')
-    if (ofile is not None):
-        index = ofile.rfind('/')
-        if (index != -1):
-            temp = ofile[:index]
-            if (not os.path.exists(temp)):
-                os.makedirs(temp)
-        if (ofile[-4:] in formats_known):
-            plt.savefig(ofile[:-4]+'_v2_ud'+ofile[-4:])
-        else:
-            plt.savefig(ofile+'_v2_ud.pdf')
+    _save_ofile(ofile, 'v2_ud')
     # plt.show()
     plt.close()
 
@@ -184,16 +191,7 @@ def v2_ud(data_list,
     plt.subplots_adjust(wspace=0., hspace=0.)
     fig.align_ylabels()
     plt.suptitle('Uniform disk fit')
-    if (ofile is not None):
-        index = ofile.rfind('/')
-        if (index != -1):
-            temp = ofile[:index]
-            if (not os.path.exists(temp)):
-                os.makedirs(temp)
-        if (ofile[-4:] in formats_known):
-            plt.savefig(ofile[:-4]+'_v2_ud'+ofile[-4:])
-        else:
-            plt.savefig(ofile+'_v2_ud.pdf')
+    _save_ofile(ofile, 'v2_ud')
     # plt.show()
     plt.close()
 
@@ -264,16 +262,7 @@ def cp_bin(data_list,
     plt.subplots_adjust(wspace=0.25, hspace=0.)
     fig.align_ylabels()
     plt.suptitle('Point-source companion fit')
-    if (ofile is not None):
-        index = ofile.rfind('/')
-        if (index != -1):
-            temp = ofile[:index]
-            if (not os.path.exists(temp)):
-                os.makedirs(temp)
-        if (ofile[-4:] in formats_known):
-            plt.savefig(ofile[:-4]+'_cp_bin'+ofile[-4:])
-        else:
-            plt.savefig(ofile+'_cp_bin.pdf')
+    _save_ofile(ofile, "cp_bin")
     # plt.show()
     plt.close()
 
@@ -374,16 +363,7 @@ def v2_cp_ud_bin(data_list,
     plt.subplots_adjust(wspace=1./3., hspace=0.)
     fig.align_ylabels()
     plt.suptitle('Uniform disk with point-source companion fit')
-    if (ofile is not None):
-        index = ofile.rfind('/')
-        if (index != -1):
-            temp = ofile[:index]
-            if (not os.path.exists(temp)):
-                os.makedirs(temp)
-        if (ofile[-4:] in formats_known):
-            plt.savefig(ofile[:-4]+'_v2_cp_ud_bin'+ofile[-4:])
-        else:
-            plt.savefig(ofile+'_v2_cp_ud_bin.pdf')
+    _save_ofile(ofile, "v2_cp_ud_bin")
     # plt.show()
     plt.close()
 
@@ -454,16 +434,7 @@ def kp_bin(data_list,
     plt.subplots_adjust(wspace=0.25, hspace=0.)
     fig.align_ylabels()
     plt.suptitle('Point-source companion fit')
-    if (ofile is not None):
-        index = ofile.rfind('/')
-        if (index != -1):
-            temp = ofile[:index]
-            if (not os.path.exists(temp)):
-                os.makedirs(temp)
-        if (ofile[-4:] in formats_known):
-            plt.savefig(ofile[:-4]+'_kp_bin'+ofile[-4:])
-        else:
-            plt.savefig(ofile+'_kp_bin.pdf')
+    _save_ofile(ofile, "kp_bin")
     # plt.show()
     plt.close()
 
@@ -614,16 +585,7 @@ def lincmap(pps,
     # ax.plot(rad, max/avg, color='black', ls=':')
     # ax.set_ylabel(r'Significance [$\sigma$]', rotation=270, labelpad=20)
     plt.tight_layout()
-    if (ofile is not None):
-        index = ofile.rfind('/')
-        if (index != -1):
-            temp = ofile[:index]
-            if (not os.path.exists(temp)):
-                os.makedirs(temp)
-        if (ofile[-4:] in formats_known):
-            plt.savefig(ofile[:-4]+'_lincmap'+ofile[-4:])
-        else:
-            plt.savefig(ofile+'_lincmap.pdf')
+    _save_ofile(ofile, "lincmap")
     # plt.show()
     plt.close()
 
@@ -717,16 +679,7 @@ def chi2map(pps_unique,
         plt.suptitle('Chi-squared map')
     else:
         plt.suptitle('Chi-squared map (search region shaded red)')
-    if (ofile is not None):
-        index = ofile.rfind('/')
-        if (index != -1):
-            temp = ofile[:index]
-            if (not os.path.exists(temp)):
-                os.makedirs(temp)
-        if (ofile[-4:] in formats_known):
-            plt.savefig(ofile[:-4]+'_chi2map'+ofile[-4:])
-        else:
-            plt.savefig(ofile+'_chi2map.pdf')
+    _save_ofile(ofile, "chi2map")
     # plt.show()
     plt.close()
 
@@ -758,16 +711,7 @@ def chains(fit,
         plt.ylabel('$\\theta$ [mas]')
         plt.legend(loc='upper right')
         plt.suptitle('MCMC chains')
-        if (ofile is not None):
-            index = ofile.rfind('/')
-            if (index != -1):
-                temp = ofile[:index]
-                if (not os.path.exists(temp)):
-                    os.makedirs(temp)
-            if (ofile[-4:] in formats_known):
-                plt.savefig(ofile[:-4]+'_mcmc_chains'+ofile[-4:])
-            else:
-                plt.savefig(ofile+'_mcmc_chains.pdf')
+        _save_ofile(ofile, "mcmc_chains")
         # plt.show()
         plt.close()
     elif (fit['model'] == 'bin'):
@@ -804,16 +748,7 @@ def chains(fit,
             plt.subplots_adjust(wspace=0.25, hspace=0.)
             fig.align_ylabels()
         plt.suptitle('MCMC chains')
-        if (ofile is not None):
-            index = ofile.rfind('/')
-            if (index != -1):
-                temp = ofile[:index]
-                if (not os.path.exists(temp)):
-                    os.makedirs(temp)
-            if (ofile[-4:] in formats_known):
-                plt.savefig(ofile[:-4]+'_mcmc_chains'+ofile[-4:])
-            else:
-                plt.savefig(ofile+'_mcmc_chains.pdf')
+        _save_ofile(ofile, "mcmc_chains")
         # plt.show()
         plt.close()
     else:
@@ -843,16 +778,7 @@ def chains(fit,
         plt.subplots_adjust(wspace=0.25, hspace=0.)
         fig.align_ylabels()
         plt.suptitle('MCMC chains')
-        if (ofile is not None):
-            index = ofile.rfind('/')
-            if (index != -1):
-                temp = ofile[:index]
-                if (not os.path.exists(temp)):
-                    os.makedirs(temp)
-            if (ofile[-4:] in formats_known):
-                plt.savefig(ofile[:-4]+'_mcmc_chains'+ofile[-4:])
-            else:
-                plt.savefig(ofile+'_mcmc_chains.pdf')
+        _save_ofile(ofile, "mcmc_chains")
         # plt.show()
         plt.close()
 
@@ -880,16 +806,7 @@ def corner(fit,
                         quantiles=[0.16, 0.5, 0.84],
                         show_titles=True,
                         title_fmt='.3f')
-        if (ofile is not None):
-            index = ofile.rfind('/')
-            if (index != -1):
-                temp = ofile[:index]
-                if (not os.path.exists(temp)):
-                    os.makedirs(temp)
-            if (ofile[-4:] in formats_known):
-                plt.savefig(ofile[:-4]+'_mcmc_corner'+ofile[-4:])
-            else:
-                plt.savefig(ofile+'_mcmc_corner.pdf')
+        _save_ofile(ofile, "mcmc_corner")
         # plt.show()
         plt.close()
     elif (fit['model'] == 'bin'):
@@ -902,13 +819,7 @@ def corner(fit,
                             quantiles=[0.16, 0.5, 0.84],
                             show_titles=True,
                             title_fmt='.3f')
-            if (ofile is not None):
-                index = ofile.rfind('/')
-                if index != -1:
-                    temp = ofile[:index]
-                    if (not os.path.exists(temp)):
-                        os.makedirs(temp)
-                plt.savefig(ofile+'_mcmc_corner.pdf')
+            _save_ofile(ofile, "mcmc_corner")
             # plt.show()
             plt.close()
         else:
@@ -923,13 +834,7 @@ def corner(fit,
                                 quantiles=[0.16, 0.5, 0.84],
                                 show_titles=True,
                                 title_fmt='.3f')
-                if (ofile is not None):
-                    index = ofile.rfind('/')
-                    if index != -1:
-                        temp = ofile[:index]
-                        if (not os.path.exists(temp)):
-                            os.makedirs(temp)
-                    plt.savefig(ofile+'_mcmc_corner.pdf')
+                _save_ofile(ofile, "mcmc_corner")
                 # plt.show()
                 plt.close()
             else:
@@ -943,13 +848,7 @@ def corner(fit,
                                 quantiles=[0.16, 0.5, 0.84],
                                 show_titles=True,
                                 title_fmt='.3f')
-                if (ofile is not None):
-                    index = ofile.rfind('/')
-                    if index != -1:
-                        temp = ofile[:index]
-                        if (not os.path.exists(temp)):
-                            os.makedirs(temp)
-                    plt.savefig(ofile+'_mcmc_corner.pdf')
+                _save_ofile(ofile, "mcmc_corner")
                 # plt.show()
                 plt.close()
     else:
@@ -963,16 +862,7 @@ def corner(fit,
                         quantiles=[0.16, 0.5, 0.84],
                         show_titles=True,
                         title_fmt='.3f')
-        if (ofile is not None):
-            index = ofile.rfind('/')
-            if (index != -1):
-                temp = ofile[:index]
-                if (not os.path.exists(temp)):
-                    os.makedirs(temp)
-            if (ofile[-4:] in formats_known):
-                plt.savefig(ofile[:-4]+'_mcmc_corner'+ofile[-4:])
-            else:
-                plt.savefig(ofile+'_mcmc_corner.pdf')
+        _save_ofile(ofile, "mcmc_corner")
         # plt.show()
         plt.close()
 
@@ -1039,6 +929,7 @@ def detlim(ffs_absil,
     data += [rad*step_size] # mas
     data += [-2.5*np.log10(avg)] # mag
     data = np.array(data)
+    # TODO: Handle with save_ofile
     if (ofile is not None):
         index = ofile.rfind('/')
         if (index != -1):
@@ -1056,6 +947,7 @@ def detlim(ffs_absil,
     data += [rad*step_size] # mas
     data += [-2.5*np.log10(avg)] # mag
     data = np.array(data)
+    # TODO: Handle with save_ofile
     if (ofile is not None):
         index = ofile.rfind('/')
         if (index != -1):
@@ -1092,15 +984,6 @@ def detlim(ffs_absil,
     ax.legend(loc='upper right')
     plt.suptitle('Detection limits ('+str(sigma)+'-$\sigma$)')
     plt.tight_layout()
-    if (ofile is not None):
-        index = ofile.rfind('/')
-        if (index != -1):
-            temp = ofile[:index]
-            if (not os.path.exists(temp)):
-                os.makedirs(temp)
-        if (ofile[-4:] in formats_known):
-            plt.savefig(ofile[:-4]+'_detlim'+ofile[-4:])
-        else:
-            plt.savefig(ofile+'_detlim.pdf')
+    _save_ofile(ofile, "detlim")
     # plt.show()
     plt.close()
