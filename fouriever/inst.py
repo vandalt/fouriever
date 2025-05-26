@@ -60,8 +60,10 @@ def open(idir,
         each instrument, and this list contains one data structure for each
         observation.
     """
+
+    file_path = os.path.join(idir, fitsfile)
     
-    hdul = pyfits.open(os.path.join(idir, fitsfile), memmap=False)
+    hdul = pyfits.open(file_path, memmap=False)
     if ('OI_TARGET' in hdul):
         inst_list, data_list = open_oifile(hdul)
     elif ('KP-DATA' in hdul):
@@ -70,7 +72,7 @@ def open(idir,
         else:
             inst_list, data_list = open_kpfile_old(hdul)
     else:
-        raise UserWarning(f'Unknown file type: {idir+fitsfile}')
+        raise UserWarning(f'Unknown file type: {file_path}')
     hdul.close()
     
     if (verbose == True):
