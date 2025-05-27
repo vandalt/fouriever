@@ -2479,15 +2479,17 @@ class data:
                     data_list[-1]['uu_smear'] = np.divide(data_list[-1]['v2u'][:, np.newaxis], wave[np.newaxis, :])
                     data_list[-1]['vv_smear'] = np.divide(data_list[-1]['v2v'][:, np.newaxis], wave[np.newaxis, :])
 
-        # Initiate the figure
-        if ofile is not None:
-            plt.figure(figsize=(3.7, 3.0))
-            ax = plt.gca()
-
         # Initiate the output list that will be returned
         u_list = []
         v_list = []
         phase_list = []
+
+        # Initiate model lists for plotting
+        model_u = None
+        model_v = None
+        model_phase = None
+        u_comp = None
+        v_comp = None
 
         # Iterate over the data files
         for data_idx, data_item in enumerate(data_list):
@@ -2511,13 +2513,6 @@ class data:
                 # Convert from B/lambda to 1/arcsec
                 u /= rad2asec
                 v /= rad2asec
-
-                # Plot the model phase in the background as image
-                plt.imshow(model_phase, extent=[u[0], u[-1], v[0], v[-1]], origin='lower', cmap='PiYG', aspect='auto')
-
-                # Add colorbar to the figure
-                cbar = plt.colorbar()
-                cbar.ax.set_ylabel('Phase (deg)', rotation=270.0, fontsize=10.0, labelpad=12.0)
 
                 # Set the (arbitrary) extent of the arrow that indicates
                 # the direction to the companion of the provided parameters
@@ -2584,27 +2579,17 @@ class data:
             u_list.append(u_coord)
             v_list.append(v_coord)
 
-        if ofile is not None:
-            if fit is not None:
-                # Plot the arrow to the provided companion parameters
-                plt.arrow(
-                    0.0,
-                    0.0,
-                    u_comp,
-                    v_comp,
-                    head_width=1.0,
-                    head_length=1.0,
-                    ls='-',
-                    lw=0.7,
-                    capstyle='round',
-                    facecolor='black',
-                )
-
-            # Update the axes labels and ticks
-            plt.xlabel('$u$ (arcsec$^{-1}$)', fontsize=12.0, labelpad=0.25)
-            plt.ylabel('$v$ (arcsec$^{-1}$)', fontsize=12.0, labelpad=0.25)
-            plt.minorticks_on()
-            plt.tight_layout()
-            util.save_ofile(ofile, 'phase')
+        plot.estimate_phase(
+            phase_list,
+            u_list,
+            v_list,
+            model_phase=model_phase,
+            model_u=model_u,
+            model_v=model_v,
+            scatter_kwargs=scatter_kwargs,
+            u_comp=u_comp,
+            v_comp=v_comp,
+            ofile=ofile,
+        )
 
         return phase_list, u_list, v_list
