@@ -37,7 +37,7 @@ class data:
         self.idir = idir
         self.fitsfiles = fitsfiles
 
-        if (self.fitsfiles is None):
+        if self.fitsfiles is None:
             self.fitsfiles = glob_fits_files(self.idir)
 
         self.inst_list = []
