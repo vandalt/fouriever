@@ -148,7 +148,6 @@ class data:
         M_inv = np.linalg.pinv(M)
 
         return M_inv
-
     def lincmap(
         self,
         cov=False,
@@ -161,6 +160,7 @@ class data:
         save_as_fits=False,
         searchbox=None,
         plot_nsigma=False,
+        return_fig=False
     ):
         """
         Parameters
@@ -188,6 +188,8 @@ class data:
             Note that -180 <= phi < 180.
         plot_nsigma: bool
             Plot detection significance instead of chi-squared map.
+        return_fig: bool
+            Add figure to the fit dictionary
 
         Returns
         -------
@@ -417,8 +419,7 @@ class data:
         fit['chi2s'] = chi2s
         fit['nsigmas'] = nsigmas
         fit['radec'] = grid_ra_dec
-
-        plot.lincmap(
+        fig = plot.lincmap(
             pps=pps,
             pes=pes,
             chi2s=chi2s,
@@ -431,7 +432,10 @@ class data:
             ofile=ofile,
             searchbox=searchbox,
             plot_nsigma=plot_nsigma,
+            return_fig=return_fig,
         )
+        if return_fig:
+            fit["fig"] = fig
 
         if save_as_fits:
             hdu0 = pyfits.PrimaryHDU(pps)
@@ -457,7 +461,6 @@ class data:
             hdul.close()
 
         return fit
-
     def chi2map(
         self,
         model='ud_bin',
@@ -469,6 +472,7 @@ class data:
         searchbox=None,
         data_list=None,
         use_mpmath=False,
+        return_fig=False,
     ):
         """
         Parameters
@@ -504,6 +508,8 @@ class data:
             always calculated with ``scipy`` and has a maximum value
             of approximately 8 sigma. The default argument is set to
             ``False``.
+        return_fig: bool
+            Add figure to the fit dictionary
 
         Returns
         -------
@@ -685,9 +691,11 @@ class data:
             fit['smear'] = smear
             fit['cov'] = str(cov)
             if klflag:
-                plot.v2_ud(data_list=data_list, fit=fit, smear=smear, ofile=ofile)
+                fig = plot.v2_ud(data_list=data_list, fit=fit, smear=smear, ofile=ofile, return_fig=return_fig)
             else:
-                plot.v2_ud_base(data_list=data_list, fit=fit, smear=smear, ofile=ofile)
+                fig = plot.v2_ud_base(data_list=data_list, fit=fit, smear=smear, ofile=ofile, return_fig=return_fig)
+            if return_fig:
+                fig["fig_v2_ud"] = fig
         else:
             # If UD is not in model, use point-source as reference chi2
             thetap = {}
@@ -857,9 +865,13 @@ class data:
             fit['cov'] = str(cov)
             fit['radec'] = grid_ra_dec
             if 'cp' in self.observables:
-                plot.cp_bin(data_list=data_list, fit=fit, smear=smear, ofile=ofile)
+                fig = plot.cp_bin(data_list=data_list, fit=fit, smear=smear, ofile=ofile, return_fig=return_fig)
+                if return_fig:
+                    fit["fig_cp_bin"] = fig
             if 'kp' in self.observables:
-                plot.kp_bin(data_list=data_list, fit=fit, smear=smear, ofile=ofile)
+                fig = plot.kp_bin(data_list=data_list, fit=fit, smear=smear, ofile=ofile, return_fig=return_fig)
+                if return_fig:
+                    fit["fig_kp_bin"] = fig
         else:
             print('   Best fit companion flux = %.3f +/- %.3f %%' % (pp[0] * 100.0, pe[0] * 100.0))
             print('   Best fit companion right ascension = %.1f +/- %.1f mas' % (pp[1], pe[1]))
@@ -880,11 +892,13 @@ class data:
             fit['cov'] = str(cov)
             fit['radec'] = grid_ra_dec
             if 'cp' in self.observables:
-                plot.v2_cp_ud_bin(data_list=data_list, fit=fit, ofile=ofile)
+                fig = plot.v2_cp_ud_bin(data_list=data_list, fit=fit, ofile=ofile, return_fig=return_fig)
+                if return_fig:
+                    fit["fig_v2_cp_ud_bin"] = fig
 
         # Produce chi2 grid by interpolating the minimization results
         # to a fine regular grid
-        chi2_map, chi2_grid = plot.chi2map(
+        plot_out = plot.chi2map(
             pps_unique=pps_unique,
             chi2s_unique=chi2s_unique,
             fit=fit,
@@ -892,7 +906,13 @@ class data:
             step_size=step_size,
             ofile=ofile,
             searchbox=searchbox,
+            return_fig=return_fig
         )
+        if return_fig:
+            fig, chi2_map, chi2_grid = plot_out
+            fit["fig_chi2"] = fig
+        else:
+            chi2_map, chi2_grid = plot_out
 
         fit['chi2_map'] = chi2_map
         fit['chi2_grid'] = chi2_grid
@@ -913,8 +933,16 @@ class data:
         return fit
 
     def chi2map_sub(
-        self, fit_sub, model='ud_bin', cov=False, sep_range=None, step_size=None, smear=None, ofile=None, searchbox=None
-    ):
+        self,
+        fit_sub,
+        model='ud_bin',
+        cov=False,
+        sep_range=None,
+        step_size=None,
+        smear=None,
+        ofile=None,
+        searchbox=None,
+        return_fig=False):
         """
         Parameters
         ----------
@@ -938,6 +966,8 @@ class data:
             Accepted formats are {'RA': [RA_min, RA_max], 'DEC': [DEC_min,
             DEC_max], 'rho': [rho_min, rho_max], 'phi': [phi_min, phi_max]}.
             Note that -180 <= phi < 180.
+        return_fig: bool
+            Add figure to the fit dictionary
 
         Returns
         -------
@@ -1025,8 +1055,8 @@ class data:
             smear=smear,
             ofile=ofile,
             searchbox=searchbox,
+            return_fig=return_fig,
         )
-
         self.data_list = buffer
 
         return fit
@@ -1144,7 +1174,6 @@ class data:
         self.data_list = buffer
 
         return None
-
     def mcmc(
         self,
         fit,
@@ -1158,6 +1187,7 @@ class data:
         smear=None,
         ofile=None,
         fixpos=False,
+        return_fig=False,
     ):
         """
         Parameters
@@ -1190,6 +1220,8 @@ class data:
             Path under which figures shall be saved.
         fixpos: bool
             Fix position of fit?
+        return_fig: bool
+            Add figure to the fit dictionary
 
         Returns
         -------
@@ -1439,15 +1471,19 @@ class data:
             ln_prob = samples[:, -1]
             samples = samples[:, :-1]
 
-        if sampler == 'emcee':
-            plot.chains(fit=fit, samples=samples, ofile=ofile, fixpos=fixpos)
+        if (sampler == 'emcee'):
+            fig = plot.chains( fit=fit, samples=samples, ofile=ofile, fixpos=fixpos, return_fig=return_fig)
+            if return_fig:
+                fig["fig_chains"] = fig
 
         if ofile is not None:
-            plot.corner(fit=fit, samples=samples, ofile=ofile, fixpos=fixpos)
-
-        pp = np.percentile(samples, 50.0, axis=0)
-        pu = np.percentile(samples, 84.0, axis=0) - pp
-        pl = pp - np.percentile(samples, 16.0, axis=0)
+            fig = plot.corner( fit=fit, samples=samples, ofile=ofile, fixpos=fixpos, return_fig=return_fig)
+            if return_fig:
+                fig["fig_corner"] = fig
+        
+        pp = np.percentile(samples, 50., axis=0)
+        pu = np.percentile(samples, 84., axis=0)-pp
+        pl = pp-np.percentile(samples, 16., axis=0)
         pe = np.mean(np.vstack((pu, pl)), axis=0)
         if fit['model'] == 'ud':
             chi2 = util.chi2_ud(p0=pp, data_list=data_list, observables=self.observables, cov=cov, smear=smear)
@@ -1536,7 +1572,6 @@ class data:
             fit['ln-evidence'] = (ln_z, ln_z_error)
 
         return fit
-
     def detlim(
         self,
         sigma=3.0,
@@ -1548,6 +1583,7 @@ class data:
         smear=None,
         ofile=None,
         cmin=1e-6,
+        return_fig=False,
     ):
         """
         Parameters
@@ -1570,6 +1606,8 @@ class data:
             Path under which figures shall be saved.
         cmin: float
             Minimum contrast for which you want to fit.
+        return_fig: bool
+            Add figure to the fit dictionary
         """
 
         if fit_sub is not None:
@@ -2008,14 +2046,15 @@ class data:
 
         ffs_absil = np.array(ffs_absil).reshape(grid_ra_dec[0].shape)
         ffs_injection = np.array(ffs_injection).reshape(grid_ra_dec[0].shape)
-
-        plot.detlim(ffs_absil, ffs_injection, sigma, sep_range, step_size, ofile)
-
+        
+        fig = plot.detlim(ffs_absil, ffs_injection, sigma, sep_range, step_size, ofile, return_fig=return_fig)
+        
         if fit_sub is not None:
             self.data_list = buffer
 
-        pass
-
+        if return_fig:
+            return fig
+    
     def lim_absil(self, f0, func, p0, data_list, observables, cov, smear, chi2_true, ndof, sigma=3):
         """
         Parameters
@@ -2265,8 +2304,7 @@ class data:
                     )
 
         return buffer
-
-    def systematics(self, fit, pa_step=1.0, n_remove=None, smear=None, ofile=None):
+    def systematics(self, fit, pa_step=1.0, n_remove=None, smear=None, ofile=None, return_fig=False):
         """
         Method for estimating the systematic uncertainties by retrieving the
         contrast and position of artificial companions that are step-wise
@@ -2296,6 +2334,8 @@ class data:
         ofile: str, None
             Path under which figures shall be saved. No figures are stored if
             the argument is set to 'None'.
+        return_fig: bool
+            Add figure to the fit dictionary
 
         Returns
         -------
@@ -2368,8 +2408,8 @@ class data:
                     ofile=out_file,
                     searchbox=None,
                     data_list=data_comp,
+                    return_fig=return_fig,
                 )
-
         # Separation and PAs for injection-recovery test.
         sep_test = np.sqrt(fit['p'][1] ** 2 + fit['p'][2] ** 2)  # mas
         pa_test = np.arange(0.0, 360.0, pa_step)  # deg
@@ -2407,8 +2447,8 @@ class data:
                 ofile=out_file,
                 searchbox=searchbox,
                 data_list=data_test,
+                return_fig=return_fig,
             )
-
             # Store the offset between the injected and retrieved values of
             # the binary parameters.
             offset[pa_idx, 0] = fit_test['p'][0] - fit_chi2['p'][0]
@@ -2417,7 +2457,7 @@ class data:
 
         return offset
 
-    def estimate_phase(self, fit=None, smear=None, ofile=None, scatter_kwargs=None):
+    def estimate_phase(self, fit=None, smear=None, ofile=None, scatter_kwargs=None, return_fig=True):
         """
         Method for estimating the phases from the closure phases.
 
@@ -2440,6 +2480,8 @@ class data:
             <https://matplotlib.org/stable/api/_as_gen/matplotlib.pyplot.scatter.html>`_
             of the phases that are extracted from the data. Default values
             are used for the plot if the argument is set to 'None'.
+        return_fig: bool
+            Add figure to the fit dictionary
 
         Returns
         -------
@@ -2535,51 +2577,12 @@ class data:
             u_coord /= rad2asec
             v_coord /= rad2asec
 
-            if ofile is not None:
-                # Create scatter plot of phases in the u-v plane. Positive
-                # phase are plotted in orange and negative phases in gray.
-                plt.scatter(
-                    u_coord[phase < 0.0],
-                    v_coord[phase < 0.0],
-                    c='none',
-                    s=40.0 * np.abs(phase[phase < 0.0]),
-                    edgecolor='silver',
-                    **scatter_kwargs,
-                )
-                plt.scatter(
-                    u_coord[phase > 0.0],
-                    v_coord[phase > 0.0],
-                    c='none',
-                    s=40.0 * phase[phase > 0.0],
-                    edgecolor='tab:orange',
-                    **scatter_kwargs,
-                )
-
-                # Due to the anti-symmetry of the phases, the colors are
-                # swapped on the mirrored side
-                plt.scatter(
-                    -u_coord[phase < 0.0],
-                    -v_coord[phase < 0.0],
-                    c='none',
-                    s=40.0 * np.abs(phase[phase < 0.0]),
-                    edgecolor='tab:orange',
-                    **scatter_kwargs,
-                )
-                plt.scatter(
-                    -u_coord[phase > 0.0],
-                    -v_coord[phase > 0.0],
-                    c='none',
-                    s=40.0 * phase[phase > 0.0],
-                    edgecolor='silver',
-                    **scatter_kwargs,
-                )
-
             # Add the phases and coordinates to the output lists
             phase_list.append(phase)
             u_list.append(u_coord)
             v_list.append(v_coord)
 
-        plot.estimate_phase(
+        fig = plot.estimate_phase(
             phase_list,
             u_list,
             v_list,
@@ -2590,6 +2593,9 @@ class data:
             u_comp=u_comp,
             v_comp=v_comp,
             ofile=ofile,
+            return_fig=return_fig,
         )
-
-        return phase_list, u_list, v_list
+        if return_fig:
+            return phase_list, u_list, v_list, fig
+        else:
+            return phase_list, u_list, v_list
