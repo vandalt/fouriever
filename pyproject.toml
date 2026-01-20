@@ -4,7 +4,7 @@ build-backend = 'setuptools.build_meta'
 
 [project]
 name = "fouriever"
-version = "0.4.15"
+version = "0.4.3"
 description = "A single toolkit for calibrations, correlations, and companion search for kernel phase, aperture masking, and long-baseline interferometry data."
 readme = "README.md"
 authors = [{ name = "Jens Kammerer" },]
