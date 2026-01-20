@@ -1480,7 +1480,7 @@ class data:
             fig = plot.corner( fit=fit, samples=samples, ofile=ofile, fixpos=fixpos, return_fig=return_fig)
             if return_fig:
                 fig["fig_corner"] = fig
-        
+
         pp = np.percentile(samples, 50., axis=0)
         pu = np.percentile(samples, 84., axis=0)-pp
         pl = pp-np.percentile(samples, 16., axis=0)
